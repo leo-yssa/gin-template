@@ -1,4 +1,4 @@
-version=1.22.2
+version=1.21.9
 base=/usr/local
 root=${base}/go
 file=go${version}.linux-amd64.tar.gz
@@ -6,6 +6,7 @@ if [ ! -f ${file} ] || [ ! -d ${base} ]; then
    echo "File ${file} does not exist."
    wget https://golang.org/dl/${file}
    sudo tar -C ${base} -xzf ${file}
+   rm ${file}
 fi
 
 if ! grep  'GOROOT' ~/.bashrc ; then
