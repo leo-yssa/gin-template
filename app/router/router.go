@@ -24,6 +24,8 @@ func Init(init *injector.Initialization) *gin.Engine {
 		// user.GET("/:userID", init.UserCtrl.GetUserById)
 		// user.PUT("/:userID", init.UserCtrl.UpdateUserData)
 		// user.DELETE("/:userID", init.UserCtrl.DeleteUser)
+		auth := api.Group("/auth")
+		auth.GET("/login", )
 	}
 
 	return router
