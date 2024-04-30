@@ -38,7 +38,18 @@ func main() {
 		WriteTimeout: time.Duration(writeTimeout) * time.Second,
 		MaxHeaderBytes: 1 << 20,
 	}
-	
+	tls, err := strconv.ParseBool(os.Getenv("TLS"))
+	if err != nil {
+		panic(err)
+	}
+	if tls {
+		if err := app.ListenAndServeTLS(
+			os.Getenv("TLS_CERTIFICATE_PATH"),
+			os.Getenv("TLS_PRIVATEKEY_PATH"),
+		); err != nil {
+			panic(err)
+		}
+	}
 	if err := app.ListenAndServe(); err != nil {
 		panic(err)
 	}

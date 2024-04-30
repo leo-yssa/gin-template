@@ -6,13 +6,12 @@ import (
 	"gorm.io/gorm"
 )
 
-//go:generate mockery --name UserService --case underscore --inpackage
 type UserRepository interface {
 	Save(user *dao.User) (dao.User, error)
 }
 
 func NewUserRepository(db *gorm.DB) UserRepository {
-	db.AutoMigrate(&dao.User{})
+	// db.AutoMigrate(&dao.User{})
 	return &UserRepositoryImpl{
 		db: db,
 	}
