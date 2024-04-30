@@ -1,42 +1,68 @@
 package service
 
 import (
-	"crypto/rand"
-	"encoding/base64"
+	"context"
 	"gin-api/app/config"
 	"gin-api/app/constant"
 	"gin-api/app/domain/dto"
 	"gin-api/app/domain/error"
+	"gin-api/app/middleware"
+	"gin-api/app/utility"
 	"net/http"
 
+	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
-	"github.com/gorilla/sessions"
+	logger "github.com/sirupsen/logrus"
 )
 
 type AuthService interface {
 	Login(c *gin.Context)
+	Logout(c *gin.Context)
+	Google(c *gin.Context)
 }
 
 type AuthServiceImpl struct {
 	
 }
 
-var store = sessions.NewCookieStore([]byte("secret"))
-
 func (u *AuthServiceImpl) Login(c *gin.Context) {
 	defer error.PanicHandler(c)
-	session, _ := store.Get(c.Request, "session")
-    session.Options = &sessions.Options{
-        Path:   "/api/auth/login",
-        MaxAge: 300,
-    }
-	b := make([]byte, 32)
-    rand.Read(b)
-    state := base64.StdEncoding.EncodeToString(b)
-    session.Values["state"] = state
-    session.Save(c.Request, c.Writer)
+	session := sessions.Default(c)
+    state := middleware.GetState()
+	session.Set("state", state)
+	session.Options(sessions.Options{
+		MaxAge: 10 * 60,
+	})
+    if err := session.Save(); err != nil {
+		logger.Error(err)
+		error.PanicException(constant.UnknownError)
+	}
 	config.NewOAuth().AuthCodeURL(state)
-	c.JSON(http.StatusOK, dto.BuildResponse(constant.Success, config.NewOAuth().AuthCodeURL(state)))
+	c.Redirect(http.StatusTemporaryRedirect, config.NewOAuth().AuthCodeURL(state))
+}
+
+func (u *AuthServiceImpl) Logout(c *gin.Context) {
+	session := sessions.Default(c)
+ 	session.Clear()
+ 	if err := session.Save(); err != nil {
+		logger.Error(err)
+		error.PanicException(constant.UnknownError)
+ 	}
+	 c.JSON(http.StatusOK, dto.BuildResponse(constant.Success, ""))
+}
+
+func (u *AuthServiceImpl) Google(c *gin.Context) {
+	defer error.PanicHandler(c)
+    token, err := config.NewOAuth().Exchange(context.Background(), c.Request.FormValue("code"))
+    if err != nil {
+        error.PanicException(constant.InvalidRequest)
+    }
+	data, err := utility.Get(constant.GOOGLE_API_URL + token.AccessToken)
+	if err != nil {
+        error.PanicException(constant.InvalidRequest)
+        return
+    }
+	c.JSON(http.StatusAccepted, dto.BuildResponse(constant.Success, data))
 }
 
 func NewAuthService() AuthService {

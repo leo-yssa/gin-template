@@ -1,6 +1,8 @@
 package config
 
 import (
+	"fmt"
+	"gin-api/app/constant"
 	"os"
 
 	"golang.org/x/oauth2"
@@ -8,11 +10,12 @@ import (
 )
 
 func NewOAuth() *oauth2.Config {
+	redirectURL := fmt.Sprintf("%s:%s%s", os.Getenv("APP_DOMAIN"), os.Getenv("APP_PORT"), constant.GOOGLE_REDIRECT_URL)
 	return &oauth2.Config{
 		ClientID: os.Getenv("OAUTH_GOOGLE_CLIENT_ID"),
 		ClientSecret: os.Getenv("OAUTH_GOOGLE_CLIENT_SECRET"),
-		RedirectURL: "/api/auth/google/callback",
-		Scopes: []string{"https://www.googleapis.com/auth/userinfo.email", "https://www.googleapis.com/auth/userinfo.profile"},
+		RedirectURL: redirectURL,
+		Scopes: []string{constant.GOOGLE_SCOPE_EMAIL, constant.GOOGLE_SCOPE_PROFILE},
 		Endpoint: google.Endpoint,
 	}
 }
