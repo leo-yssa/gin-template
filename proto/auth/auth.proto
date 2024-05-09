@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+option go_package = "gin-api/grpc/pkg/api/auth";
+
+package auth;
+
+service Auth {
+    rpc login(User) returns (Result);
+}
+
+message User {
+    string id = 1;
+    string email = 2;
+    string name = 3;
+    int32 roleId = 4;
+}
+
+message Result {
+
+}
