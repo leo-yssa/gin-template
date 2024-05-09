@@ -29,7 +29,7 @@ func NewClient(host, port string) (*Client, error) {
 
 func (c *Client) Login(id, email, name string, roleId int32) (*auth.Result, error){
 	defer c.Connection.Close()
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second * 60)
 	defer cancel()
 	return c.AuthClient.Login(ctx, &auth.User{
 		Id: id,

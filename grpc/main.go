@@ -8,7 +8,11 @@ import (
 	"gin-api/grpc/app/server"
 	"gin-api/grpc/pkg/api/auth"
 
+	grpc_logrus "github.com/grpc-ecosystem/go-grpc-middleware/logging/logrus"
+	grpc_recovery "github.com/grpc-ecosystem/go-grpc-middleware/recovery"
+	grpc_ctxtags "github.com/grpc-ecosystem/go-grpc-middleware/tags"
 	"github.com/joho/godotenv"
+	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 )
 
@@ -19,7 +23,19 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	s := grpc.NewServer()
+	logrus.ErrorKey = "grpc.error"
+	logrusEntry := logrus.NewEntry(logrus.StandardLogger())
+	s := grpc.NewServer(
+		grpc.ChainUnaryInterceptor(
+			grpc_ctxtags.UnaryServerInterceptor(
+				grpc_ctxtags.WithFieldExtractor(
+					grpc_ctxtags.CodeGenRequestFieldExtractor,
+				),
+			),
+			grpc_logrus.UnaryServerInterceptor(logrusEntry),
+			grpc_recovery.UnaryServerInterceptor(),
+		),
+	)
 	auth.RegisterAuthServer(s, &server.Server{})
 	if err := s.Serve(listener); err != nil {
 		panic(err)

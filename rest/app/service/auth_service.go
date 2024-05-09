@@ -70,21 +70,11 @@ func (u *AuthServiceImpl) Google(c *gin.Context) {
 	if err != nil {
         dto.PanicException(constant.InvalidRequest)
     }
-	grpcClient, err := utility.NewClient()
-	if err != nil {
-		dto.PanicException(constant.GrpcServiceFailure)
-	}
-	grpcResult, err := grpcClient.Login("1", "test@test.com", "test", 1)
-	if err != nil {
-		dto.PanicException(constant.GrpcServiceFailure)
-	}
-	logger.Info(grpcResult)
 	tokenString, err := dto.NewClaims("1", 1, secret)
 	logger.Info(tokenString)
 	if err != nil {
 		dto.PanicException(constant.UnknownError)
 	}
-
 	c.JSON(http.StatusAccepted, dto.BuildResponse(constant.Success, data))
 }
 

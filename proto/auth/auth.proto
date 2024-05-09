@@ -16,5 +16,6 @@ message User {
 }
 
 message Result {
-
+    string address = 1;
+    string transactionHash = 2;
 }
