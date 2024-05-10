@@ -7,6 +7,7 @@ import (
 
 	"gin-api/grpc/app/server"
 	"gin-api/grpc/pkg/api/auth"
+	"gin-api/grpc/pkg/api/hello"
 
 	grpc_logrus "github.com/grpc-ecosystem/go-grpc-middleware/logging/logrus"
 	grpc_recovery "github.com/grpc-ecosystem/go-grpc-middleware/recovery"
@@ -37,6 +38,7 @@ func main() {
 		),
 	)
 	auth.RegisterAuthServer(s, &server.Server{})
+	hello.RegisterHelloServer(s, &server.Server{})
 	if err := s.Serve(listener); err != nil {
 		panic(err)
 	}

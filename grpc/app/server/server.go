@@ -3,6 +3,7 @@ package server
 import (
 	"context"
 	"gin-api/grpc/pkg/api/auth"
+	"gin-api/grpc/pkg/api/hello"
 	"gin-api/grpc/pkg/contract"
 	"math/big"
 	"os"
@@ -12,10 +13,14 @@ import (
 )
 type Server struct {
 	auth.UnimplementedAuthServer
+	hello.UnimplementedHelloServer
 }
 
 func (s *Server) Login(ctx context.Context, in *auth.User) (*auth.Result, error) {
-	
+	return nil, status.Errorf(codes.Internal, "dose not implements yet")
+}
+
+func (s *Server) Deploy(ctx context.Context, in *hello.Empty) (*hello.DeployResponse, error) {
 	client, err := contract.NewClient(contract.HEDERA_TESTNET)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to connect ethereum client")
@@ -37,9 +42,32 @@ func (s *Server) Login(ctx context.Context, in *auth.User) (*auth.Result, error)
 		return nil, status.Errorf(codes.Internal, "failed to deploy contract")
 	}
 
-	return &auth.Result{
+	return &hello.DeployResponse{
 		Address: address.Hex(),
 		TransactionHash: transaction.Hash().Hex(),
 	}, nil
-
 }
+
+func (s *Server) Say(ctx context.Context, in *hello.SayRequest) (*hello.SayResponse, error) {
+	client, err := contract.NewClient(contract.HEDERA_TESTNET)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to connect ethereum client")
+	}
+	address := contract.HexToAddress(in.GetAddress())
+	secret, err := contract.HexToECDSA(os.Getenv("OPERATOR_SECRET"))
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "invalid privatekey")
+	}
+	from, err := contract.ToAddress(secret)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to extract address")
+	}
+	message, err := client.Hello.Say(address, client.NewCallOpts(from), client.Ethclient)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to call contract")
+	}
+	
+	return &hello.SayResponse{
+		Message: message,
+	}, nil
+}	

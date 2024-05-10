@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+option go_package = "gin-api/grpc/pkg/api/hello";
+
+package hello;
+
+service Hello {
+    rpc deploy(Empty) returns (DeployResponse);
+    rpc say(SayRequest) returns (SayResponse);
+}
+
+message Empty {
+}
+
+message SayRequest {
+    string address = 1;
+}
+
+message SayResponse {
+    string message = 1;
+}
+
+message DeployResponse {
+    string address = 1;
+    string transactionHash = 2;
+}

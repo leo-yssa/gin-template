@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"gin-api/grpc/pkg/api/auth"
+	"gin-api/grpc/pkg/api/hello"
 	"time"
 
 	"google.golang.org/grpc"
@@ -13,6 +14,7 @@ import (
 type Client struct {
 	Connection *grpc.ClientConn
 	AuthClient auth.AuthClient
+	HelloCient hello.HelloClient
 }
 
 func NewClient(host, port string) (*Client, error) {
@@ -20,10 +22,12 @@ func NewClient(host, port string) (*Client, error) {
 	if err != nil {
 		return nil, nil
 	}
-	client := auth.NewAuthClient(connection)
+	authClient := auth.NewAuthClient(connection)
+	helloClient := hello.NewHelloClient(connection)
 	return &Client{
 		Connection: connection,
-		AuthClient: client,
+		AuthClient: authClient,
+		HelloCient: helloClient,
 	}, nil
 }
 
@@ -37,4 +41,18 @@ func (c *Client) Login(id, email, name string, roleId int32) (*auth.Result, erro
 		Name: name,
 		RoleId: roleId,
 	})
+}
+
+func (c *Client) Deploy() (*hello.DeployResponse, error) {
+	defer c.Connection.Close()
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second * 60)
+	defer cancel()
+	return c.HelloCient.Deploy(ctx, &hello.Empty{})
+}
+
+func (c *Client) Say(address string) (*hello.SayResponse, error) {
+	defer c.Connection.Close()
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second * 60)
+	defer cancel()
+	return c.HelloCient.Say(ctx, &hello.SayRequest{Address: address})
 }

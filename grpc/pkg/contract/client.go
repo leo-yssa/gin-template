@@ -60,6 +60,10 @@ func ToAddress(key *ecdsa.PrivateKey) (common.Address, error) {
 	return crypto.PubkeyToAddress(key.PublicKey), nil
 }
 
+func HexToAddress(hex string) (common.Address) {
+	return common.HexToAddress(hex)
+}
+
 func (c *Client) pendingNonceAt(from common.Address) (*big.Int, error) {
 	nonce, err := c.Ethclient.PendingNonceAt(context.Background(), from)
 	if err != nil {
@@ -91,4 +95,9 @@ func (c *Client) NewTransactor(from common.Address, value *big.Int, privateKey *
 	return auth, nil
 }
 
+func (c *Client) NewCallOpts(from common.Address) *bind.CallOpts {
+	return &bind.CallOpts{
+		From: from,
+	}
+}
 
