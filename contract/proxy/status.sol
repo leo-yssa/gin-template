@@ -2,6 +2,7 @@
 pragma solidity ^0.8.15;
 
 import "./beacon.sol";
+import "../@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
 contract Status {
     uint public result = 1;

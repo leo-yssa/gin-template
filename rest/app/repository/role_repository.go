@@ -24,6 +24,7 @@ type RoleRepositoryImpl struct {
 }
 
 func (u *RoleRepositoryImpl) Init() error {
+	
 	u.db.Create(&dao.Role{
 		ID: 1,
 		Role: "sys",

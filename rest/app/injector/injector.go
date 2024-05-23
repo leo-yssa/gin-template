@@ -3,6 +3,7 @@ package injector
 import (
 	"gin-api/rest/app/config"
 	"gin-api/rest/app/controller"
+	"gin-api/rest/app/injector/announcement"
 	"gin-api/rest/app/injector/auth"
 	"gin-api/rest/app/injector/user"
 	"gin-api/rest/app/middleware"
@@ -17,6 +18,7 @@ type Initialization struct {
 	Store redis.Store
 	UserCtrl controller.UserController
 	AuthCtrl controller.AuthController
+	AnnouncementCtrl controller.AnnouncementController
 }
 
 func Init() (*Initialization, error){
@@ -35,6 +37,7 @@ func Init() (*Initialization, error){
 		initialization.DB = db
 		initialization.UserCtrl = user.Init(db)
 		initialization.AuthCtrl = auth.Init()
+		initialization.AnnouncementCtrl = announcement.Init(db)
 		return initialization, nil
 	}
 } 

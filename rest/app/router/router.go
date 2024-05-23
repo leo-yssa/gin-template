@@ -36,6 +36,11 @@ func Init(init *injector.Initialization) *gin.Engine {
 				auth.POST("/logout", init.AuthCtrl.Logout)
 			}
 		}
+		announcement := api.Group("/announcement")
+		announcement.POST("", init.AnnouncementCtrl.Register)
+		announcement.GET("/:announcementID", init.AnnouncementCtrl.Get)
+		announcement.PUT("/:announcementID", init.AnnouncementCtrl.Modify)
+		announcement.DELETE("/:announcementID", init.AnnouncementCtrl.Delete)
 	}
 
 	return router

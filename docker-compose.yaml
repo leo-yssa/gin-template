@@ -1,0 +1,29 @@
+version: "3.7"
+
+services:
+  mysql:
+    image: mysql
+    container_name: mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: 1234 # root 사용자의 비밀번호 설정
+      MYSQL_DATABASE: template # 초기화될 데이터베이스
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+    command: --default-authentication-plugin=mysql_native_password --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+
+  redis:
+    image: redis
+    container_name: redis
+    restart: always
+    ports:
+      - "6379:6379"
+
+volumes:
+  mysql-data: {}
+
+networks:
+  default:
+    driver: bridge
